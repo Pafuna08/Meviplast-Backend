@@ -1,233 +1,296 @@
-# E-commerce API
+# MEVIPLAST Backend
 
-API REST completa para sistema de e-commerce desarrollada con Flask y SQLAlchemy.
+API REST para la gestion de MEVIPLAST, una empresa dedicada a la fabricacion y comercializacion de productos plasticos. El backend centraliza usuarios, roles, ubicaciones, materias primas, productos terminados, produccion, ventas y reportes.
 
-## Estructura del Proyecto
+Construido con Flask, SQLAlchemy y SQLite. La API utiliza JWT para proteger los recursos autenticados y CORS para comunicarse con un frontend.
 
-```
-ecommerce-api/
-├── .env                    # Variables de entorno
-├── app.py                  # Punto de entrada
-├── requirements.txt        # Dependencias
+## Funcionalidades
+
+- Autenticacion y autorizacion mediante JWT.
+- Gestion de usuarios y roles: Administrador, Supervisor, Operario, Almacenista y Vendedor.
+- Catalogo de productos terminados con stock, precios, imagenes y categorias.
+- Gestion de materias primas.
+- Registro y seguimiento de tareas de produccion.
+- Carrito de compras, checkout y consulta de ventas.
+- Catalogo geografico de paises, departamentos/estados y ciudades.
+- Estadisticas para usuarios, categorias, ventas y reportes.
+
+## Tecnologias
+
+- Python 3
+- Flask 2.3.3
+- Flask-SQLAlchemy 3.0.5
+- Flask-CORS 4.0.0
+- PyJWT 2.8.0
+- SQLite
+
+## Estructura del proyecto
+
+```text
+Meviplast-Backend/
+├── app.py                         # Punto de entrada de Flask
+├── change.py                      # Utilidad de cambios o migraciones
+├── requirement.txt                # Dependencias del proyecto
+├── seed_meviplast.py              # Datos iniciales completos
+├── seed_production.py             # Datos de materias primas y produccion
+├── ApiDocumentacion.MD            # Coleccion de ejemplos cURL
 ├── database/
-│   ├── create-ecommerce.sql
-│   └── ecommerce.db
+│   └── meviplast_init.sql         # Script SQL de inicializacion
 └── app/
-    ├── __init__.py         # Configuración Flask
-    ├── models.py           # Modelos SQLAlchemy
+    ├── __init__.py                # Configuracion y registro de blueprints
+    ├── models.py                  # Modelos SQLAlchemy
     └── routes/
-        ├── auth_routes.py      # Autenticación
-        ├── product_routes.py   # Productos
-        ├── user_routes.py      # Usuarios
-        ├── sales_routes.py     # Ventas y carrito
-        ├── category_routes.py  # Categorías
-        └── location_routes.py  # Ubicaciones
+        ├── auth_routes.py         # Autenticacion y roles
+        ├── category_routes.py     # Categorias
+        ├── location_routes.py     # Ubicaciones
+        ├── material_routes.py     # Materias primas
+        ├── product_routes.py      # Productos e inventario
+        ├── production_routes.py   # Tareas de produccion
+        ├── report_routes.py       # Reportes
+        ├── sales_routes.py        # Carrito y ventas
+        └── user_routes.py         # Usuarios
 ```
 
-## Instalación
+> El archivo SQLite `database/meviplast.db` se crea localmente al iniciar la aplicacion y no se versiona en Git.
 
-1. **Clonar y navegar al proyecto**
+## Instalacion
+
+### 1. Clonar el repositorio
+
 ```bash
-cd ecommerce-api
+git clone https://github.com/Pafuna08/Meviplast-Backend.git
+cd Meviplast-Backend
 ```
 
-2. **Crear entorno virtual**
-```bash
+### 2. Crear y activar un entorno virtual
+
+En Windows PowerShell:
+
+```powershell
 python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux/Mac
+venv\Scripts\Activate.ps1
+```
+
+En Linux o macOS:
+
+```bash
+python3 -m venv venv
 source venv/bin/activate
 ```
 
-3. **Instalar dependencias**
+### 3. Instalar dependencias
+
 ```bash
-pip install -r requirements.txt
+pip install -r requirement.txt
 ```
 
-4. **Configurar variables de entorno**
-El archivo `.env` ya está configurado:
-```
-FLASK_DEBUG=True
-SECRET_KEY=HolaMundo
-DATABASE_URL=sqlite:///database/ecommerce.db
+### 4. Configurar variables de entorno
+
+El proyecto funciona con valores predeterminados, pero se recomienda crear un archivo `.env`:
+
+```env
+SECRET_KEY=una-clave-segura-para-desarrollo
 ```
 
-5. **Ejecutar la aplicación**
+No subas el archivo `.env` al repositorio. La aplicacion usa SQLite en `database/meviplast.db` y crea las tablas automaticamente al iniciar.
+
+## Ejecucion
+
 ```bash
 python app.py
 ```
 
-La API estará disponible en: `http://localhost:5050`
+La API queda disponible en `http://localhost:5060`.
 
-## Endpoints Principales
+Puedes comprobar que esta funcionando con:
 
-### Autenticación (`/api/auth`)
-- `POST /api/auth/register` - Registrar usuario
-- `POST /api/auth/login` - Iniciar sesión
-- `POST /api/auth/verify-token` - Verificar token
-- `PUT /api/auth/change-password` - Cambiar contraseña
-- `GET /api/auth/roles` - Obtener roles
-
-### Productos (`/api/products`)
-- `GET /api/products/` - Listar productos (con filtros)
-- `GET /api/products/{id}` - Obtener producto específico
-- `POST /api/products/` - Crear producto
-- `PUT /api/products/{id}` - Actualizar producto
-- `DELETE /api/products/{id}` - Eliminar producto
-- `GET /api/products/search` - Buscar productos
-- `GET /api/products/featured` - Productos destacados
-
-### Ventas y Carrito (`/api/sales`)
-**Carrito:**
-- `GET /api/sales/cart` - Ver carrito
-- `POST /api/sales/cart/add` - Agregar al carrito
-- `PUT /api/sales/cart/update/{id}` - Actualizar cantidad
-- `DELETE /api/sales/cart/remove/{id}` - Eliminar del carrito
-- `DELETE /api/sales/cart/clear` - Vaciar carrito
-
-**Ventas:**
-- `POST /api/sales/checkout` - Procesar compra
-- `GET /api/sales/` - Listar ventas
-- `GET /api/sales/{id}` - Detalle de venta
-- `GET /api/sales/stats` - Estadísticas (admin)
-
-### Usuarios (`/api/users`)
-- `GET /api/users/profile` - Perfil del usuario
-- `PUT /api/users/profile` - Actualizar perfil
-- `GET /api/users/` - Listar usuarios (admin)
-- `GET /api/users/{id}` - Usuario específico
-- `PUT /api/users/{id}/roles` - Actualizar roles (admin)
-- `DELETE /api/users/{id}` - Eliminar usuario (admin)
-
-### Categorías (`/api/categories`)
-- `GET /api/categories/` - Listar categorías
-- `GET /api/categories/{id}` - Categoría específica
-- `POST /api/categories/` - Crear categoría
-- `PUT /api/categories/{id}` - Actualizar categoría
-- `DELETE /api/categories/{id}` - Eliminar categoría
-
-### Ubicaciones (`/api/locations`)
-- `GET /api/locations/countries` - Listar países
-- `GET /api/locations/states` - Listar estados
-- `GET /api/locations/cities` - Listar ciudades
-- `GET /api/locations/hierarchy` - Jerarquía completa
-- `GET /api/locations/search` - Buscar ubicaciones
-
-## Autenticación
-
-La API usa JWT (JSON Web Tokens) para autenticación. 
-
-**Para endpoints protegidos, incluir en headers:**
-```
-Authorization: Bearer {token}
-```
-
-## Ejemplos de Uso
-
-### 1. Registrar Usuario
 ```bash
-curl -X POST http://localhost:5050/api/auth/register \
+curl http://localhost:5060/
+```
+
+## Datos de prueba
+
+Para cargar roles, usuarios, materias primas, productos, tareas de produccion y ventas de ejemplo:
+
+```bash
+python seed_meviplast.py
+```
+
+Para cargar un conjunto adicional de materias primas y tareas de produccion:
+
+```bash
+python seed_production.py
+```
+
+`seed_meviplast.py` crea estos usuarios de prueba. Todos usan la contrasena `123456`:
+
+| Usuario | Correo | Rol |
+| --- | --- | --- |
+| Pablo Admin | `Pablo@gmail.com` | Administrador |
+| Carlos Supervisor | `carlos@meviplast.com` | Supervisor |
+| Juan Operario | `juan@meviplast.com` | Operario |
+| Maria Almacenista | `maria@meviplast.com` | Almacenista |
+| Luis Vendedor | `luis@meviplast.com` | Vendedor |
+
+Estos datos son solo para desarrollo. Cambia las contrasenas antes de usar la API en un entorno real.
+
+## Autenticacion
+
+Primero inicia sesion para obtener un token JWT:
+
+```bash
+curl -X POST http://localhost:5060/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "UserName": "test_user",
-    "Email": "test@example.com",
-    "PasswoRDkey": "password123",
-    "iD_City": 1
+    "Email": "Pablo@gmail.com",
+    "PasswoRDkey": "123456"
   }'
 ```
 
-### 2. Iniciar Sesión
-```bash
-curl -X POST http://localhost:5050/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "Email": "test@example.com",
-    "PasswoRDkey": "password123"
-  }'
+En los endpoints protegidos envia el token en el encabezado:
+
+```text
+Authorization: Bearer TU_TOKEN
 ```
 
-### 3. Listar Productos
+## Endpoints
+
+Todos los endpoints usan el prefijo `http://localhost:5060`.
+
+### Autenticacion: `/api/auth`
+
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| POST | `/register` | Registrar usuario |
+| POST | `/login` | Iniciar sesion |
+| POST | `/verify-token` | Verificar token |
+| GET | `/roles` | Listar roles |
+| PUT | `/change-password` | Cambiar contrasena |
+
+### Usuarios: `/api/users`
+
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| GET, PUT | `/profile` | Consultar o actualizar el perfil propio |
+| GET | `/` | Listar usuarios |
+| GET | `/<user_id>` | Consultar usuario |
+| PUT | `/<user_id>/roles` | Actualizar roles |
+| DELETE | `/<user_id>` | Eliminar usuario |
+| GET | `/<user_id>/sales` | Consultar ventas del usuario |
+| GET | `/stats` | Estadisticas de usuarios |
+| GET | `/search` | Buscar usuarios |
+
+### Productos: `/api/products`
+
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| GET | `/` | Listar productos |
+| GET | `/<product_id>` | Consultar producto |
+| POST | `/` | Crear producto |
+| PUT | `/<product_id>` | Actualizar producto |
+| DELETE | `/<product_id>` | Eliminar producto |
+| POST | `/<product_id>/images` | Agregar imagen |
+| DELETE | `/<product_id>/images/<image_id>` | Eliminar imagen |
+| PUT | `/<product_id>/stock` | Actualizar stock |
+| GET | `/search` | Buscar productos |
+| GET | `/featured` | Listar productos destacados |
+
+### Categorias: `/api/categories`
+
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| GET | `/` | Listar categorias |
+| GET | `/<category_id>` | Consultar categoria |
+| POST | `/` | Crear categoria |
+| PUT | `/<category_id>` | Actualizar categoria |
+| DELETE | `/<category_id>` | Eliminar categoria |
+| GET | `/<category_id>/products` | Productos de una categoria |
+| GET | `/stats` | Estadisticas de categorias |
+
+### Materias primas: `/api/materials`
+
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| GET | `/` | Listar materias primas |
+
+### Produccion: `/api/production`
+
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| GET | `/tasks` | Listar tareas de produccion |
+| POST | `/tasks` | Crear tarea |
+| PUT | `/assign` | Asignar tarea |
+| POST | `/record` | Registrar produccion realizada |
+
+### Ventas y carrito: `/api/sales`
+
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| GET | `/cart` | Consultar carrito |
+| POST | `/cart/add` | Agregar producto al carrito |
+| PUT | `/cart/update/<item_id>` | Actualizar cantidad |
+| DELETE | `/cart/remove/<item_id>` | Retirar producto |
+| DELETE | `/cart/clear` | Vaciar carrito |
+| POST | `/checkout` | Crear venta desde el carrito |
+| GET | `/` | Listar ventas |
+| GET | `/<sale_id>` | Consultar venta |
+| GET | `/stats` | Estadisticas de ventas |
+
+### Ubicaciones: `/api/locations`
+
+Incluye operaciones de consulta y creacion para paises, estados/departamentos y ciudades:
+
+- `GET, POST /countries`
+- `GET /countries/<country_id>`
+- `GET, POST /states`
+- `GET /states/<state_id>`
+- `GET /countries/<country_id>/states`
+- `GET, POST /cities`
+- `GET /cities/<city_id>`
+- `GET /states/<state_id>/cities`
+- `GET /countries/<country_id>/cities`
+- `GET /hierarchy`
+- `GET /search`
+
+### Reportes: `/api/reports`
+
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| GET | `/stats` | Consultar estadisticas generales |
+
+## Paginacion y filtros
+
+Los endpoints de listado que lo soportan aceptan parametros como:
+
+- `page`: numero de pagina.
+- `per_page`: cantidad de resultados por pagina.
+- `search`: texto de busqueda.
+- Filtros propios de cada recurso.
+
+Consulta `ApiDocumentacion.MD` para ver ejemplos de peticiones cURL y cuerpos JSON.
+
+## Codigos de respuesta comunes
+
+| Codigo | Significado |
+| --- | --- |
+| 200 | Peticion exitosa |
+| 201 | Recurso creado |
+| 400 | Datos invalidos |
+| 401 | Falta autenticacion o el token no es valido |
+| 403 | El usuario no tiene permisos |
+| 404 | Recurso no encontrado |
+| 409 | Conflicto o registro duplicado |
+| 500 | Error interno del servidor |
+
+## Desarrollo
+
+Antes de subir cambios:
+
 ```bash
-curl -X GET "http://localhost:5050/api/products/?page=1&per_page=10&search=iPhone"
+git status
+git add .
+git commit -m "Describe el cambio"
+git push origin main
 ```
 
-### 4. Agregar al Carrito
-```bash
-curl -X POST http://localhost:5050/api/sales/cart/add \
-  -H "Authorization: Bearer {token}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "id_Product": 1,
-    "quantity": 2
-  }'
-```
-
-### 5. Procesar Compra
-```bash
-curl -X POST http://localhost:5050/api/sales/checkout \
-  -H "Authorization: Bearer {token}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "DescripcionSale": "Compra online"
-  }'
-```
-
-## Roles de Usuario
-
-- **Administrador**: Acceso completo a toda la API
-- **Usuario/Cliente**: Acceso a productos, carrito y sus propias ventas
-- **Vendedor**: Funcionalidades específicas de ventas
-- **Cliente**: Funcionalidades básicas de compra
-
-## Filtros y Paginación
-
-La mayoría de endpoints de listado soportan:
-- `page`: Número de página (default: 1)
-- `per_page`: Items por página (default: 10)
-- `search`: Búsqueda por texto
-- Filtros específicos por endpoint
-
-## Códigos de Respuesta
-
-- `200`: Éxito
-- `201`: Creado exitosamente
-- `400`: Error en datos enviados
-- `401`: No autorizado (token inválido)
-- `403`: Prohibido (sin permisos)
-- `404`: No encontrado
-- `409`: Conflicto (duplicado)
-- `500`: Error del servidor
-
-## Base de Datos
-
-La API usa SQLite por defecto. El archivo de base de datos se crea automáticamente en `database/ecommerce.db` con datos de ejemplo incluidos.
-
-### Datos de Ejemplo Incluidos:
-- **Admin**: admin@ecommerce.com / admin123
-- **Productos**: iPhone, Samsung, MacBook, etc.
-- **Categorías**: Electrónicos, Ropa, Hogar, etc.
-- **Ubicaciones**: Colombia con departamentos y ciudades
-
-## Funcionalidades Principales
-
-✅ **Sistema de autenticación JWT**
-✅ **CRUD completo para productos**
-✅ **Carrito de compras funcional**
-✅ **Sistema de ventas**
-✅ **Gestión de usuarios y roles**
-✅ **Categorías de productos**
-✅ **Ubicaciones geográficas**
-✅ **Búsqueda y filtros**
-✅ **Paginación**
-✅ **Validaciones**
-✅ **Manejo de errores**
-
-## Notas Técnicas
-
-- **ORM**: SQLAlchemy con relaciones bien definidas
-- **Validaciones**: Verificación de stock, emails únicos, etc.
-- **Seguridad**: Passwords hasheados, validación de tokens
-- **CORS**: Habilitado para desarrollo frontend
-- **Blueprints**: Código organizado en módulos
-- **Gestión de stock**: Actualización automática en ventas
+El proyecto ignora el entorno virtual, archivos `.env`, caches de Python, logs y bases de datos locales.
