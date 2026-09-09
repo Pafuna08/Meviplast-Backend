@@ -1,0 +1,110 @@
+-- SCRIPT DE INICIALIZACIÓN DE BASE DE DATOS MEVIPLAST
+-- PROYECTO INTEGRADOR SENA CTMA - FICHA 3223873
+
+-- 1. UBICACIONES Y GEOGRAFÍA
+CREATE TABLE IF NOT EXISTS country (
+    iD_Country INTEGER PRIMARY KEY AUTOINCREMENT,
+    CountryName TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS states (
+    iD_States INTEGER PRIMARY KEY AUTOINCREMENT,
+    StatesName TEXT NOT NULL,
+    iD_Country INTEGER NOT NULL,
+    FOREIGN KEY(iD_Country) REFERENCES country(iD_Country)
+);
+
+CREATE TABLE IF NOT EXISTS city (
+    iD_City INTEGER PRIMARY KEY AUTOINCREMENT,
+    CityName TEXT NOT NULL,
+    iD_States INTEGER NOT NULL,
+    FOREIGN KEY(iD_States) REFERENCES states(iD_States)
+);
+
+-- 2. SEGURIDAD Y CONTROL DE ACCESO
+CREATE TABLE IF NOT EXISTS RoleS (
+    iDRole INTEGER PRIMARY KEY AUTOINCREMENT,
+    TypeRole TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    iD_User INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserName TEXT NOT NULL,
+    Email TEXT NOT NULL UNIQUE,
+    PasswoRDkey TEXT NOT NULL,
+    iD_City INTEGER,
+    FOREIGN KEY(iD_City) REFERENCES city(iD_City)
+);
+
+CREATE TABLE IF NOT EXISTS UserRole (
+    idROLE INTEGER,
+    iD_Useri INTEGER,
+    PRIMARY KEY(idROLE, iD_Useri),
+    FOREIGN KEY(idROLE) REFERENCES RoleS(iDRole),
+    FOREIGN KEY(iD_Useri) REFERENCES users(iD_User)
+);
+
+-- 3. INVENTARIO Y PRODUCCIÓN
+CREATE TABLE IF NOT EXISTS material (
+    iD_Material INTEGER PRIMARY KEY AUTOINCREMENT,
+    MaterialName TEXT NOT NULL,
+    Quantity REAL NOT NULL DEFAULT 0.0,
+    Unit TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS product (
+    id_Product INTEGER PRIMARY KEY AUTOINCREMENT,
+    Price REAL NOT NULL,
+    ProductName TEXT NOT NULL,
+    Stock INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS category (
+    id_Category INTEGER PRIMARY KEY AUTOINCREMENT,
+    CategoryName TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS PRODUC_Category (
+    id_Category INTEGER,
+    id_Product INTEGER,
+    PRIMARY KEY(id_Category, id_Product),
+    FOREIGN KEY(id_Category) REFERENCES category(id_Category),
+    FOREIGN KEY(id_Product) REFERENCES product(id_Product)
+);
+
+CREATE TABLE IF NOT EXISTS production_task (
+    iD_Task INTEGER PRIMARY KEY AUTOINCREMENT,
+    Description TEXT NOT NULL,
+    AssignedTo INTEGER,
+    Status TEXT NOT NULL DEFAULT 'Pendiente',
+    TargetQuantity INTEGER NOT NULL,
+    ProducedQuantity INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY(AssignedTo) REFERENCES users(iD_User)
+);
+
+-- 4. VENTAS
+CREATE TABLE IF NOT EXISTS sales (
+    id_Sale INTEGER PRIMARY KEY AUTOINCREMENT,
+    DescripcionSale TEXT,
+    iD_User INTEGER NOT NULL,
+    DateCreated DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(iD_User) REFERENCES users(iD_User)
+);
+
+CREATE TABLE IF NOT EXISTS sales_detail (
+    id_SalesDetails INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_Product INTEGER NOT NULL,
+    id_Sale INTEGER NOT NULL,
+    amount INTEGER NOT NULL,
+    ValueSale REAL NOT NULL,
+    DateSales DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(id_Product) REFERENCES product(id_Product),
+    FOREIGN KEY(id_Sale) REFERENCES sales(id_Sale)
+);
+
+-- 5. INSERCIÓN DE ROLES BASE
+INSERT INTO RoleS (TypeRole) VALUES ('Administrador');
+INSERT INTO RoleS (TypeRole) VALUES ('Supervisor');
+INSERT INTO RoleS (TypeRole) VALUES ('Operario');
+INSERT INTO RoleS (TypeRole) VALUES ('Almacenista');
+INSERT INTO RoleS (TypeRole) VALUES ('Vendedor');
