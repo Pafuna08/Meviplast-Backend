@@ -1,64 +1,97 @@
-# MEVIPLAST - Backend (Sistema de Gestión Integral)
+# MEVIPLAST Backend
 
-Este es el servidor oficial de **MEVIPLAST**, desarrollado como proyecto integrador para el **SENA CTMA** (Ficha 3223873). El sistema centraliza la gestión de una planta de plásticos, abarcando desde la recepción de materias primas hasta la venta del producto terminado.
+API REST para la gestion de MEVIPLAST, una empresa dedicada a la fabricacion y comercializacion de productos plasticos. El backend centraliza usuarios, roles, ubicaciones, materias primas, productos terminados, produccion, ventas y reportes.
 
-## 🚀 Despliegue en Vivo
-La API está actualmente desplegada y operativa en:
+Construido con Flask, SQLAlchemy y SQLite. La API utiliza JWT para proteger los recursos autenticados y CORS para comunicarse con un frontend.
+
+## 🚀 Despliegue en Render
+La API está actualmente desplegada y disponible en:
 **URL:** [https://meviplast-backend.onrender.com](https://meviplast-backend.onrender.com)
 
----
+## Funcionalidades
 
-## 🛠️ Tecnologías y Arquitectura
-- **Lenguaje:** Python 3.12+
-- **Framework:** Flask (Estructura modular por Blueprints)
-- **ORM:** SQLAlchemy (Gestión de base de datos relacional)
-- **Seguridad:** Autenticación basada en **JWT** (JSON Web Tokens) y cifrado de contraseñas.
-- **Base de Datos:** SQLite (Migrable a PostgreSQL/MySQL)
-- **Despliegue:** Optimizado para Render con Gunicorn.
+- Autenticacion y autorizacion mediante JWT.
+- Gestion de usuarios y roles: Administrador, Supervisor, Operario, Almacenista y Vendedor.
+- Catalogo de productos terminados con stock, precios, imagenes y categorias.
+- Gestion de materias primas.
+- Registro y seguimiento de tareas de produccion.
+- Carrito de compras, checkout y consulta de ventas.
+- Catalogo geografico de paises, departamentos/estados y ciudades.
+- Estadisticas para usuarios, categorias, ventas y reportes.
 
----
+## Tecnologias
 
-## 👥 Jerarquía de Usuarios y Roles
-El sistema implementa un control de acceso basado en roles (RBAC) con los siguientes usuarios de prueba (Contraseña: `123456`):
+- Python 3
+- Flask 2.3.3
+- Flask-SQLAlchemy 3.0.5
+- Flask-CORS 4.0.0
+- PyJWT 2.8.0
+- SQLite
 
-| Nombre | Correo | Rol | Funciones |
-| :--- | :--- | :--- | :--- |
-| **Pablo Admin** | `Pablo@gmail.com` | Administrador | Gestión total, creación de tareas y usuarios. |
-| **Carlos Supervisor** | `carlos@meviplast.com` | Supervisor | Asignación de tareas, monitoreo e inventario. |
-| **Juan / Ana** | `juan@meviplast.com` / `Ana@gmail.com` | Operario | Registro de avances de producción. |
-| **Maria Almacenista** | `maria@meviplast.com` | Almacenista | Control de materias primas e insumos. |
-| **Luis Vendedor** | `luis@meviplast.com` | Vendedor | Catálogo de productos y registro de ventas. |
+## Estructura del proyecto
 
----
+```text
+Meviplast-Backend/
+├── app.py                         # Punto de entrada de Flask
+├── wsgi.py                        # Punto de entrada para Gunicorn/Render
+├── requirement.txt                # Dependencias del proyecto
+├── seed_meviplast.py              # Datos iniciales completos
+├── ApiDocumentacion.MD            # Coleccion de ejemplos cURL
+└── app/
+    ├── __init__.py                # Configuracion y registro de blueprints
+    ├── models.py                  # Modelos SQLAlchemy
+    └── routes/
+        ├── auth_routes.py         # Autenticacion y roles
+        ├── material_routes.py     # Materias primas
+        ├── product_routes.py      # Productos e inventario
+        ├── production_routes.py   # Tareas de produccion
+        ├── report_routes.py       # Reportes
+        ├── sales_routes.py        # Carrito y ventas
+        └── user_routes.py         # Usuarios
+```
 
-## 📦 Módulos del Sistema
-- **⚙️ Producción:** Flujo completo desde la creación de la orden (Admin) hasta la ejecución (Operario) y supervisión (Supervisor).
-- **🔋 Inventario:** Separación lógica entre Materias Primas (Insumos) y Productos Terminados (Venta).
-- **💰 Ventas:** Sistema de carrito y checkout con actualización automática de stock en tiempo real.
-- **📊 Reportes:** Tableros de control con indicadores de cumplimiento de producción, recaudación de ventas y alertas de bajo stock.
-- **📍 Ubicaciones:** Gestión de geografía (Países, Estados, Ciudades) para la logística.
+## Instalacion
 
----
+### 1. Clonar el repositorio
 
-## 💾 Instalación y Desarrollo Local
-1. **Clonar Repositorio:**
-   ```bash
-   git clone https://github.com/Pafuna08/Meviplast-Backend.git
-   cd Meviplast-Backend
-   ```
-2. **Entorno Virtual:**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # o venv\Scripts\activate en Windows
-   ```
-3. **Dependencias:**
-   ```bash
-   pip install -r requirement.txt
-   ```
-4. **Ejecución:**
-   ```bash
-   python app.py
-   ```
+```bash
+git clone https://github.com/Pafuna08/Meviplast-Backend.git
+cd Meviplast-Backend
+```
+
+### 2. Crear y activar un entorno virtual
+
+En Windows PowerShell:
+
+```powershell
+python -m venv venv
+venv\Scripts\Activate.ps1
+```
+
+### 3. Instalar dependencias
+
+```bash
+pip install -r requirement.txt
+```
+
+## Datos de prueba
+
+Para cargar roles, usuarios, materias primas, productos, tareas de produccion y ventas de ejemplo:
+
+```bash
+python seed_meviplast.py
+```
+
+`seed_meviplast.py` crea estos usuarios de prueba. Todos usan la contrasena `123456`:
+
+| Usuario           | Correo                 | Rol           |
+| ----------------- | ---------------------- | ------------- |
+| Pablo Admin       | `Pablo@gmail.com`      | Administrador |
+| Carlos Supervisor | `carlos@meviplast.com` | Supervisor    |
+| Juan Operario     | `juan@meviplast.com`   | Operario      |
+| Ana Operario      | `Ana@gmail.com`        | Operario      |
+| Maria Almacenista | `maria@meviplast.com`  | Almacenista   |
+| Luis Vendedor     | `luis@meviplast.com`   | Vendedor      |
 
 ---
 **Proyecto Integrador - SENA CTMA 2026**
