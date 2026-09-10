@@ -29,6 +29,7 @@ Construido con Flask, SQLAlchemy y SQLite. La API utiliza JWT para proteger los 
 ```text
 Meviplast-Backend/
 ├── app.py                         # Punto de entrada de Flask
+├── wsgi.py                        # Punto de entrada para Gunicorn/Render
 ├── change.py                      # Utilidad de cambios o migraciones
 ├── requirement.txt                # Dependencias del proyecto
 ├── seed_meviplast.py              # Datos iniciales completos
@@ -108,6 +109,17 @@ Puedes comprobar que esta funcionando con:
 curl http://localhost:5060/
 ```
 
+### Despliegue en Render
+
+Este repositorio incluye `render.yaml` con la configuracion del servicio. Si configuras el servicio manualmente, utiliza:
+
+```text
+Build Command: pip install -r requirement.txt
+Start Command: gunicorn wsgi:app --bind 0.0.0.0:$PORT
+```
+
+En las variables de entorno de Render agrega una `SECRET_KEY` larga y privada. No uses la clave predeterminada en produccion.
+
 ## Datos de prueba
 
 Para cargar roles, usuarios, materias primas, productos, tareas de produccion y ventas de ejemplo:
@@ -124,13 +136,13 @@ python seed_production.py
 
 `seed_meviplast.py` crea estos usuarios de prueba. Todos usan la contrasena `123456`:
 
-| Usuario | Correo | Rol |
-| --- | --- | --- |
-| Pablo Admin | `Pablo@gmail.com` | Administrador |
-| Carlos Supervisor | `carlos@meviplast.com` | Supervisor |
-| Juan Operario | `juan@meviplast.com` | Operario |
-| Maria Almacenista | `maria@meviplast.com` | Almacenista |
-| Luis Vendedor | `luis@meviplast.com` | Vendedor |
+| Usuario           | Correo                 | Rol           |
+| ----------------- | ---------------------- | ------------- |
+| Pablo Admin       | `Pablo@gmail.com`      | Administrador |
+| Carlos Supervisor | `carlos@meviplast.com` | Supervisor    |
+| Juan Operario     | `juan@meviplast.com`   | Operario      |
+| Maria Almacenista | `maria@meviplast.com`  | Almacenista   |
+| Luis Vendedor     | `luis@meviplast.com`   | Vendedor      |
 
 Estos datos son solo para desarrollo. Cambia las contrasenas antes de usar la API en un entorno real.
 
@@ -159,82 +171,82 @@ Todos los endpoints usan el prefijo `http://localhost:5060`.
 
 ### Autenticacion: `/api/auth`
 
-| Metodo | Ruta | Descripcion |
-| --- | --- | --- |
-| POST | `/register` | Registrar usuario |
-| POST | `/login` | Iniciar sesion |
-| POST | `/verify-token` | Verificar token |
-| GET | `/roles` | Listar roles |
-| PUT | `/change-password` | Cambiar contrasena |
+| Metodo | Ruta               | Descripcion        |
+| ------ | ------------------ | ------------------ |
+| POST   | `/register`        | Registrar usuario  |
+| POST   | `/login`           | Iniciar sesion     |
+| POST   | `/verify-token`    | Verificar token    |
+| GET    | `/roles`           | Listar roles       |
+| PUT    | `/change-password` | Cambiar contrasena |
 
 ### Usuarios: `/api/users`
 
-| Metodo | Ruta | Descripcion |
-| --- | --- | --- |
-| GET, PUT | `/profile` | Consultar o actualizar el perfil propio |
-| GET | `/` | Listar usuarios |
-| GET | `/<user_id>` | Consultar usuario |
-| PUT | `/<user_id>/roles` | Actualizar roles |
-| DELETE | `/<user_id>` | Eliminar usuario |
-| GET | `/<user_id>/sales` | Consultar ventas del usuario |
-| GET | `/stats` | Estadisticas de usuarios |
-| GET | `/search` | Buscar usuarios |
+| Metodo   | Ruta               | Descripcion                             |
+| -------- | ------------------ | --------------------------------------- |
+| GET, PUT | `/profile`         | Consultar o actualizar el perfil propio |
+| GET      | `/`                | Listar usuarios                         |
+| GET      | `/<user_id>`       | Consultar usuario                       |
+| PUT      | `/<user_id>/roles` | Actualizar roles                        |
+| DELETE   | `/<user_id>`       | Eliminar usuario                        |
+| GET      | `/<user_id>/sales` | Consultar ventas del usuario            |
+| GET      | `/stats`           | Estadisticas de usuarios                |
+| GET      | `/search`          | Buscar usuarios                         |
 
 ### Productos: `/api/products`
 
-| Metodo | Ruta | Descripcion |
-| --- | --- | --- |
-| GET | `/` | Listar productos |
-| GET | `/<product_id>` | Consultar producto |
-| POST | `/` | Crear producto |
-| PUT | `/<product_id>` | Actualizar producto |
-| DELETE | `/<product_id>` | Eliminar producto |
-| POST | `/<product_id>/images` | Agregar imagen |
-| DELETE | `/<product_id>/images/<image_id>` | Eliminar imagen |
-| PUT | `/<product_id>/stock` | Actualizar stock |
-| GET | `/search` | Buscar productos |
-| GET | `/featured` | Listar productos destacados |
+| Metodo | Ruta                              | Descripcion                 |
+| ------ | --------------------------------- | --------------------------- |
+| GET    | `/`                               | Listar productos            |
+| GET    | `/<product_id>`                   | Consultar producto          |
+| POST   | `/`                               | Crear producto              |
+| PUT    | `/<product_id>`                   | Actualizar producto         |
+| DELETE | `/<product_id>`                   | Eliminar producto           |
+| POST   | `/<product_id>/images`            | Agregar imagen              |
+| DELETE | `/<product_id>/images/<image_id>` | Eliminar imagen             |
+| PUT    | `/<product_id>/stock`             | Actualizar stock            |
+| GET    | `/search`                         | Buscar productos            |
+| GET    | `/featured`                       | Listar productos destacados |
 
 ### Categorias: `/api/categories`
 
-| Metodo | Ruta | Descripcion |
-| --- | --- | --- |
-| GET | `/` | Listar categorias |
-| GET | `/<category_id>` | Consultar categoria |
-| POST | `/` | Crear categoria |
-| PUT | `/<category_id>` | Actualizar categoria |
-| DELETE | `/<category_id>` | Eliminar categoria |
-| GET | `/<category_id>/products` | Productos de una categoria |
-| GET | `/stats` | Estadisticas de categorias |
+| Metodo | Ruta                      | Descripcion                |
+| ------ | ------------------------- | -------------------------- |
+| GET    | `/`                       | Listar categorias          |
+| GET    | `/<category_id>`          | Consultar categoria        |
+| POST   | `/`                       | Crear categoria            |
+| PUT    | `/<category_id>`          | Actualizar categoria       |
+| DELETE | `/<category_id>`          | Eliminar categoria         |
+| GET    | `/<category_id>/products` | Productos de una categoria |
+| GET    | `/stats`                  | Estadisticas de categorias |
 
 ### Materias primas: `/api/materials`
 
-| Metodo | Ruta | Descripcion |
-| --- | --- | --- |
-| GET | `/` | Listar materias primas |
+| Metodo | Ruta | Descripcion            |
+| ------ | ---- | ---------------------- |
+| GET    | `/`  | Listar materias primas |
 
 ### Produccion: `/api/production`
 
-| Metodo | Ruta | Descripcion |
-| --- | --- | --- |
-| GET | `/tasks` | Listar tareas de produccion |
-| POST | `/tasks` | Crear tarea |
-| PUT | `/assign` | Asignar tarea |
-| POST | `/record` | Registrar produccion realizada |
+| Metodo | Ruta      | Descripcion                    |
+| ------ | --------- | ------------------------------ |
+| GET    | `/tasks`  | Listar tareas de produccion    |
+| POST   | `/tasks`  | Crear tarea                    |
+| PUT    | `/assign` | Asignar tarea                  |
+| POST   | `/record` | Registrar produccion realizada |
 
 ### Ventas y carrito: `/api/sales`
 
-| Metodo | Ruta | Descripcion |
-| --- | --- | --- |
-| GET | `/cart` | Consultar carrito |
-| POST | `/cart/add` | Agregar producto al carrito |
-| PUT | `/cart/update/<item_id>` | Actualizar cantidad |
-| DELETE | `/cart/remove/<item_id>` | Retirar producto |
-| DELETE | `/cart/clear` | Vaciar carrito |
-| POST | `/checkout` | Crear venta desde el carrito |
-| GET | `/` | Listar ventas |
-| GET | `/<sale_id>` | Consultar venta |
-| GET | `/stats` | Estadisticas de ventas |
+| Metodo | Ruta                     | Descripcion                  |
+| ------ | ------------------------ | ---------------------------- |
+| GET    | `/cart`                  | Consultar carrito            |
+| POST   | `/cart/add`              | Agregar producto al carrito  |
+| PUT    | `/cart/update/<item_id>` | Actualizar cantidad          |
+| DELETE | `/cart/remove/<item_id>` | Retirar producto             |
+| DELETE | `/cart/clear`            | Vaciar carrito               |
+| POST   | `/checkout`              | Crear venta desde el carrito |
+| GET    | `/`                      | Listar ventas                |
+| GET    | `/<sale_id>`             | Consultar venta              |
+| GET    | `/stats`                 | Estadisticas de ventas       |
 
 ### Ubicaciones: `/api/locations`
 
@@ -254,9 +266,9 @@ Incluye operaciones de consulta y creacion para paises, estados/departamentos y 
 
 ### Reportes: `/api/reports`
 
-| Metodo | Ruta | Descripcion |
-| --- | --- | --- |
-| GET | `/stats` | Consultar estadisticas generales |
+| Metodo | Ruta     | Descripcion                      |
+| ------ | -------- | -------------------------------- |
+| GET    | `/stats` | Consultar estadisticas generales |
 
 ## Paginacion y filtros
 
@@ -271,16 +283,16 @@ Consulta `ApiDocumentacion.MD` para ver ejemplos de peticiones cURL y cuerpos JS
 
 ## Codigos de respuesta comunes
 
-| Codigo | Significado |
-| --- | --- |
-| 200 | Peticion exitosa |
-| 201 | Recurso creado |
-| 400 | Datos invalidos |
-| 401 | Falta autenticacion o el token no es valido |
-| 403 | El usuario no tiene permisos |
-| 404 | Recurso no encontrado |
-| 409 | Conflicto o registro duplicado |
-| 500 | Error interno del servidor |
+| Codigo | Significado                                 |
+| ------ | ------------------------------------------- |
+| 200    | Peticion exitosa                            |
+| 201    | Recurso creado                              |
+| 400    | Datos invalidos                             |
+| 401    | Falta autenticacion o el token no es valido |
+| 403    | El usuario no tiene permisos                |
+| 404    | Recurso no encontrado                       |
+| 409    | Conflicto o registro duplicado              |
+| 500    | Error interno del servidor                  |
 
 ## Desarrollo
 

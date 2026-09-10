@@ -3,7 +3,7 @@
 ## Variables de entorno para Postman
 
 ```
-BASE_URL = http://localhost:5050
+BASE_URL = http://localhost:5060
 TOKEN = [El token JWT que obtienes del login]
 ```
 
@@ -67,7 +67,7 @@ curl -X GET {{BASE_URL}}/api/auth/roles \
 
 ### Cambiar a rol admin (ajusta el ID del usuario)
 ```bash
-curl -X PUT http://localhost:5050/api/users/5/roles \
+curl -X PUT http://localhost:5060/api/users/5/roles \
   -H "Authorization: Bearer TU_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"role_ids":[1]}'
@@ -520,7 +520,7 @@ curl -X GET {{BASE_URL}}/ \
 ## 💡 NOTAS IMPORTANTES
 
 1. **Token JWT**: Después del login, copia el token de la respuesta y úsalo en `{{TOKEN}}`
-2. **Base URL**: Asegúrate de que la API esté corriendo en puerto 5050
+2. **Base URL**: Asegúrate de que la API esté corriendo en puerto 5060
 3. **Datos de prueba**: La BD viene con usuarios pre-creados:
    - **Admin**: `admin@ecommerce.com` / `admin123`
    - **Usuario**: `juan@email.com` / `password123`
