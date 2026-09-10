@@ -68,23 +68,88 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-        from app.models import RoleS, Users
+        from app.models import RoleS, Users, Material, Product, ProductionTask, Sales, SalesDetail
+        from datetime import datetime, timedelta
+
         if RoleS.query.count() == 0:
             # 1. Crear Roles
-            admin_role = RoleS(TypeRole='Administrador')
-            db.session.add(admin_role)
-            db.session.add(RoleS(TypeRole='Supervisor'))
-            db.session.add(RoleS(TypeRole='Operario'))
-            db.session.add(RoleS(TypeRole='Almacenista'))
-            db.session.add(RoleS(TypeRole='Vendedor'))
+            roles_names = ['Administrador', 'Supervisor', 'Operario', 'Almacenista', 'Vendedor']
+            for name in roles_names:
+                db.session.add(RoleS(TypeRole=name))
             db.session.commit()
 
-            # 2. Crear Usuario Admin Inicial
-            if not Users.query.filter_by(Email='Pablo@gmail.com').first():
-                admin = Users(UserName='Pablo Admin', Email='Pablo@gmail.com')
-                admin.set_password('123456')
-                admin.roles.append(admin_role)
-                db.session.add(admin)
-                db.session.commit()
+            # 2. Crear Usuarios de Prueba
+            users_data = [
+                ('Pablo Admin', 'Pablo@gmail.com', 'Administrador'),
+                ('Carlos Supervisor', 'carlos@meviplast.com', 'Supervisor'),
+                ('Juan Operario', 'juan@meviplast.com', 'Operario'),
+                ('Maria Almacenista', 'maria@meviplast.com', 'Almacenista'),
+                ('Luis Vendedor', 'luis@meviplast.com', 'Vendedor')
+            ]
+
+            for name, email, role_name in users_data:
+                if not Users.query.filter_by(Email=email).first():
+                    u = Users(UserName=name, Email=email)
+                    u.set_password('123456')
+                    role = RoleS.query.filter_by(TypeRole=role_name).first()
+                    if role:
+                        u.roles.append(role)
+                    db.session.add(u)
+            db.session.commit()
+
+            # 3. Materias Primas
+            if not Material.query.first():
+                db.session.add_all([
+                    Material(MaterialName='Polietileno (HDPE)', Quantity=500.5, Unit='kg'),
+                    Material(MaterialName='Polipropileno (PP)', Quantity=250.0, Unit='kg'),
+                    Material(MaterialName='Pigmento Azul', Quantity=10.0, Unit='kg'),
+                    Material(MaterialName='Recuperado Molido', Quantity=800.0, Unit='kg')
+                ])
+
+            # 4. Productos Terminados
+            if not Product.query.first():
+                db.session.add_all([
+                    Product(ProductName='Caneca Plástica 20L', Price=15000.0, Stock=150),
+                    Product(ProductName='Envase Industrial 1L', Price=2500.0, Stock=2000),
+                    Product(ProductName='Tapa de Seguridad 38mm', Price=150.0, Stock=10000),
+                    Product(ProductName='Caja Agrícola Calada', Price=12000.0, Stock=80)
+                ])
+            db.session.commit()
+
+            # 5. Tareas de Producción
+            if not ProductionTask.query.first():
+                db.session.add_all([
+                    ProductionTask(Description='Fabricación 1000 envases 1L', Status='Pendiente', TargetQuantity=1000),
+                    ProductionTask(Description='Inyección de 5000 tapas', Status='En Proceso', TargetQuantity=5000, ProducedQuantity=2500),
+                    ProductionTask(Description='Molienda de purga (HDPE)', Status='Terminada', TargetQuantity=200, ProducedQuantity=200)
+                ])
+
+            # 6. Ventas Históricas
+            if not Sales.query.first():
+                vendedor = Users.query.join(Users.roles).filter(RoleS.TypeRole == 'Vendedor').first()
+                prod1 = Product.query.filter_by(ProductName='Caneca Plástica 20L').first()
+
+                if vendedor and prod1:
+                    for i in range(5):
+                        sale = Sales(
+                            iD_User=vendedor.iD_User,
+                            DescripcionSale=f"Venta de ejemplo #{i+1}",
+                            DateCreated=datetime.utcnow() - timedelta(days=i)
+                        )
+                        db.session.add(sale)
+                        db.session.flush()
+
+                        detail = SalesDetail(
+                            id_Product=prod1.id_Product,
+                            id_Sale=sale.id_Sale,
+                            amount=2,
+                            ValueSale=prod1.Price * 2,
+                            DateSales=sale.DateCreated
+                        )
+                        db.session.add(detail)
+
+            db.session.commit()
+
+    return app
 
     return app
