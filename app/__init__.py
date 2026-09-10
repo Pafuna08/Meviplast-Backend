@@ -83,6 +83,7 @@ def create_app():
                 ('Pablo Admin', 'Pablo@gmail.com', 'Administrador'),
                 ('Carlos Supervisor', 'carlos@meviplast.com', 'Supervisor'),
                 ('Juan Operario', 'juan@meviplast.com', 'Operario'),
+                ('Ana Operario', 'Ana@gmail.com', 'Operario'),
                 ('Maria Almacenista', 'maria@meviplast.com', 'Almacenista'),
                 ('Luis Vendedor', 'luis@meviplast.com', 'Vendedor')
             ]
