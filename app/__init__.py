@@ -64,8 +64,27 @@ def create_app():
             }
         }
     
-    # Crear tablas si no existen
+    # Crear tablas y sembrar datos iniciales si es necesario
     with app.app_context():
         db.create_all()
-    
+
+        from app.models import RoleS, Users
+        if RoleS.query.count() == 0:
+            # 1. Crear Roles
+            admin_role = RoleS(TypeRole='Administrador')
+            db.session.add(admin_role)
+            db.session.add(RoleS(TypeRole='Supervisor'))
+            db.session.add(RoleS(TypeRole='Operario'))
+            db.session.add(RoleS(TypeRole='Almacenista'))
+            db.session.add(RoleS(TypeRole='Vendedor'))
+            db.session.commit()
+
+            # 2. Crear Usuario Admin Inicial
+            if not Users.query.filter_by(Email='Pablo@gmail.com').first():
+                admin = Users(UserName='Pablo Admin', Email='Pablo@gmail.com')
+                admin.set_password('123456')
+                admin.roles.append(admin_role)
+                db.session.add(admin)
+                db.session.commit()
+
     return app
